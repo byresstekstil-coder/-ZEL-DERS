@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <title>Koç Defteri — Günlük | Gelir-Gider | Öğrenci</title>
+  <meta name="theme-color" content="#0ea5e9" />
+  <style>
+    :root{--bg:#0b1020;--card:#121a2e;--ink:#e6f0ff;--muted:#a7b3c9;--accent:#0ea5e9;--good:#22c55e;--bad:#ef4444;--warn:#f59e0b}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;background:linear-gradient(180deg,#0b1020,#0f1a36 40%,#0b1020);color:var(--ink)}
+    .wrap{max-width:920px;margin:0 auto;padding:14px}
+    header{position:sticky;top:0;background:rgba(11,16,32,.8);backdrop-filter:blur(8px);z-index:10;border-bottom:1px solid rgba(255,255,255,.06)}
+    .bar{display:flex;align-items:center;gap:10px;padding:10px 6px}
+    .brand{font-weight:800;letter-spacing:.3px;display:flex;align-items:center;gap:10px}
+    .brand img{width:28px;height:28px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:#081427}
+    .tag{font-size:12px;color:var(--muted);padding:2px 8px;border:1px solid rgba(255,255,255,.12);border-radius:999px}
+    nav{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:8px}
+    nav button{border:1px solid rgba(255,255,255,.12);background:var(--card);color:var(--ink);padding:10px 8px;border-radius:12px;font-weight:600}
+    nav button.active{outline:2px solid var(--accent)}
+    .cards{display:grid;gap:12px}
+    .card{background:rgba(18,26,46,.85);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px}
+    .card h3{margin:0 0 10px 0}
+    label{font-size:13px;color:var(--muted)}
+    input,select,textarea{width:100%;background:#0f1730;border:1px solid rgba(255,255,255,.12);color:var(--ink);padding:10px;border-radius:10px}
+    textarea{min-height:80px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+    .btn{background:var(--accent);color:#001322;border:none;padding:10px 14px;border-radius:12px;font-weight:800}
+    .btn.ghost{background:transparent;color:var(--ink);border:1px solid rgba(255,255,255,.18)}
+    .btn.bad{background:var(--bad);color:white}
+    .btn.good{background:var(--good);color:white}
+    .list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+    .item{display:flex;align-items:flex-start;gap:10px;background:#0e1530;border:1px solid rgba(255,255,255,.06);padding:10px;border-radius:12px}
+    .item small{color:var(--muted)}
+    .item .title{font-weight:700}
+    .right{margin-left:auto;display:flex;gap:8px}
+    .pill{font-size:11px;border:1px solid rgba(255,255,255,.18);padding:2px 8px;border-radius:999px;color:var(--muted)}
+    .muted{color:var(--muted)}
+    .sum{display:flex;gap:10px;flex-wrap:wrap}
+    .sum .box{background:#0e1733;border:1px solid rgba(255,255,255,.12);padding:8px 10px;border-radius:12px}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+    footer{padding:60px 12px 20px;color:var(--muted);text-align:center}
+    .hint{font-size:12px;color:var(--muted)}
+    .search{display:flex;gap:8px}
+    .hide{display:none}
+    @media (max-width:720px){.row,.row3,.grid2,.grid3{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap bar">
+      <div class="brand">
+        <img src="logo_mehmet_erturk.svg" alt="Mehmet Ertürk Logo"/>
+        <div>Koç Defteri</div>
+      </div>
+      <span class="tag">Günlük · Gelir/Gider · Öğrenci</span>
+      <div class="right">
+        <button class="btn ghost" id="installBtn" title="Ana ekrana ekle">➕ Ana Ekran</button>
+        <button class="btn ghost" id="backupBtn" title="Verileri dışa aktar">⬇️ Yedek</button>
+        <input type="file" id="restoreFile" accept="application/json" class="hide" />
+        <button class="btn ghost" id="restoreBtn" title="Yedekten yükle">⬆️ Yükle</button>
+      </div>
+    </div>
+    <nav class="wrap">
+      <button data-tab="home" class="active">Bugün</button>
+      <button data-tab="finance">Gelir–Gider</button>
+      <button data-tab="students">Öğrenciler</button>
+      <button data-tab="settings">Ayarlar</button>
+    </nav>
+  </header>
+
+  <main class="wrap cards">
+    <!-- HOME / TODO -->
+    <section id="tab-home" class="card">
+      <h3>Bugünkü İşlerim</h3>
+      <div class="row">
+        <div>
+          <label>Başlık</label>
+          <input id="todoTitle" placeholder="Örn: 17:00 Derse hazırlık" />
+        </div>
+        <div>
+          <label>Tarih & Saat</label>
+          <input id="todoDate" type="datetime-local" />
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Kategori</label>
+          <select id="todoCat">
+            <option>Genel</option>
+            <option>Ders</option>
+            <option>İş</option>
+            <option>Öğrenci</option>
+            <option>Kişisel</option>
+          </select>
+        </div>
+        <div>
+          <label>Not</label>
+          <input id="todoNote" placeholder="Kısa not…" />
+        </div>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:8px">
+        <button class="btn good" id="addTodo">+ Ekle</button>
+        <button class="btn ghost" id="clearDone">✔️ Tamamlananları Temizle</button>
+      </div>
+      <div class="sum" id="todoSummary" style="margin-top:12px"></div>
+      <div class="list" id="todoList"></div>
+      <div class="hint">İpucu: Öğrenciyle ilgili iş için başlığa öğrencinin adını yazarsan, öğrenciler sayfasında da görünecek.</div>
+    </section>
+
+    <!-- FINANCE -->
+    <section id="tab-finance" class="card hide">
+      <h3>Gelir – Gider</h3>
+      <div class="row3">
+        <div>
+          <label>Tür</label>
+          <select id="txType"><option value="gelir">Gelir</option><option value="gider">Gider</option></select>
+        </div>
+        <div>
+          <label>Tutar (TL)</label>
+          <input id="txAmount" type="number" inputmode="decimal" placeholder="0" />
+        </div>
+        <div>
+          <label>Tarih</label>
+          <input id="txDate" type="date" />
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Kategori</label>
+          <input id="txCat" placeholder="Örn: Özel ders / Kırtasiye" />
+        </div>
+        <div>
+          <label>Açıklama</label>
+          <input id="txNote" placeholder="Kısa not…" />
+        </div>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:8px">
+        <button class="btn good" id="addTx">+ Kaydet</button>
+        <button class="btn ghost" id="clearTx">🧹 Tümünü Temizle (yalnızca tablo)</button>
+      </div>
+      <div class="sum" id="txSummary" style="margin-top:12px"></div>
+      <div class="search" style="margin-top:10px">
+        <input id="txSearch" placeholder="Ara (kategori/açıklama)" />
+        <button class="btn ghost" id="txThisMonth">Bu Ay</button>
+        <button class="btn ghost" id="txAll">Tümü</button>
+      </div>
+      <div class="list" id="txList"></div>
+    </section>
+
+    <!-- STUDENTS -->
+    <section id="tab-students" class="card hide">
+      <h3>Öğrenciler</h3>
+      <div class="row">
+        <div>
+          <label>Öğrenci Adı</label>
+          <input id="stName" placeholder="Örn: Ali Veli" />
+        </div>
+        <div>
+          <label>Sınıf/Düzey</label>
+          <input id="stGrade" placeholder="Örn: TYT / 9. Sınıf" />
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Son Konu</label>
+          <input id="stLastTopic" placeholder="Örn: Trigonometri – Açı ölçüleri" />
+        </div>
+        <div>
+          <label>Son Tarih</label>
+          <input id="stLastDate" type="date" />
+        </div>
+      </div>
+      <label>Notlar</label>
+      <textarea id="stNotes" placeholder="Ödev, eksikler, veli notu…"></textarea>
+      <div style="margin-top:10px;display:flex;gap:8px">
+        <button class="btn good" id="addStudent">+ Öğrenci Ekle/Güncelle</button>
+        <button class="btn ghost" id="newSession">+ Ders Oturumu</button>
+      </div>
+      <div class="search" style="margin-top:10px">
+        <input id="stSearch" placeholder="Öğrenci ara…" />
+        <button class="btn ghost" id="stAll">Tümü</button>
+      </div>
+      <div class="list" id="stList"></div>
+    </section>
+
+    <!-- SETTINGS / ABOUT -->
+    <section id="tab-settings" class="card hide">
+      <h3>Ayarlar & Bilgi</h3>
+      <div class="grid2">
+        <div class="box">
+          <p><b>Veri Saklama:</b> Tüm veriler <u>telefonunun yerel hafızasında (localStorage)</u> tutulur. İnternet gerektirmez. İstersen üstteki <b>Yedek</b> butonuyla JSON indir, <b>Yükle</b> ile geri al.</p>
+          <p><b>Ana Ekran:</b> Tarayıcı menüsünden <i>“Ana ekrana ekle”</i> seçerek uygulama gibi kullanabilirsin. Üstteki <b>Ana Ekran</b> butonu destekliyorsa kısa yol önerir.</p>
+          <p><b>Geliştirici Notu:</b> Tek dosyadır, Vercel’e statik olarak yükleyip çalıştırabilirsin. Servis çalışanı (service worker) ve manifest dosyası bu sayfanın içinde dinamik oluşturulur.</p>
+        </div>
+        <div class="box">
+          <p><b>Hızlı İpuçları</b></p>
+          <ul>
+            <li>Bugün sekmesinde işleri işaretleyince üstü çizilir. “Tamamlananları Temizle” ile gizlenir.</li>
+            <li>Gelir–Gider sekmesinde <b>Bu Ay</b> ile aylık özet; arama kutusuyla filtre yap.</li>
+            <li>Öğrenci adına tıklayınca detay kartı genişler; yeni oturum ekleyebilirsin.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Mehmet ERTÜRK · Matematik Öğretmeni & Öğrenci Koçu — © 2025
+  </footer>
+
+  <script>
+  // ---------- UTIL & STORAGE ----------
+  const $ = sel => document.querySelector(sel);
+  const $$ = sel => Array.from(document.querySelectorAll(sel));
+  const store = {
+    get(){ try{return JSON.parse(localStorage.getItem('coachbook')||'{}')}catch(e){return{}} },
+    set(d){ localStorage.setItem('coachbook', JSON.stringify(d)); }
+  }
+  const data = Object.assign({todos:[],txs:[],students:[]}, store.get());
+  const save = ()=>store.set(data);
+  const fmtMoney = n=> (Number(n)||0).toLocaleString('tr-TR', {style:'currency', currency:'TRY', maximumFractionDigits:0});
+  const todayISO = ()=> new Date().toISOString().slice(0,10);
+
+  // ---------- TABS ----------
+  $$('nav button').forEach(btn=>btn.onclick=()=>{
+    $$('nav button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const tab = btn.dataset.tab;
+    $$('main section').forEach(s=>s.classList.add('hide'));
+    $('#tab-'+tab).classList.remove('hide');
+    if(tab==='finance') renderTx();
+    if(tab==='home') renderTodos();
+    if(tab==='students') renderStudents();
+  });
+
+  // ---------- TODOS ----------
+  $('#todoDate').value = new Date().toISOString().slice(0,16);
+  $('#addTodo').onclick = ()=>{
+    const t = {
+      id: crypto.randomUUID(),
+      title: $('#todoTitle').value.trim(),
+      date: $('#todoDate').value || new Date().toISOString(),
+      cat: $('#todoCat').value,
+      note: $('#todoNote').value.trim(),
+      done:false
+    };
+    if(!t.title) return alert('Başlık gerekli');
+    data.todos.push(t); save();
+    $('#todoTitle').value=''; $('#todoNote').value='';
+    renderTodos();
+  }
+  $('#clearDone').onclick = ()=>{
+    data.todos = data.todos.filter(x=>!x.done); save(); renderTodos();
+  }
+  function renderTodos(){
+    const list = $('#todoList'); list.innerHTML='';
+    const todays = data.todos.slice().sort((a,b)=>a.date.localeCompare(b.date));
+    let due=0, done=0; todays.forEach(t=>{ t.done?done++:due++; });
+    $('#todoSummary').innerHTML = `
+      <div class="box">Toplam: <b>${todays.length}</b></div>
+      <div class="box">Bekleyen: <b>${due}</b></div>
+      <div class="box">Tamamlanan: <b>${done}</b></div>`;
+    todays.forEach(t=>{
+      const div = document.createElement('div'); div.className='item';
+      const chk = document.createElement('input'); chk.type='checkbox'; chk.checked=t.done; chk.onchange=()=>{t.done=chk.checked; save();}
+      const info = document.createElement('div');
+      const when = new Date(t.date);
+      info.innerHTML = `<div class="title">${t.title}</div>
+        <small>${when.toLocaleString('tr-TR')} · <span class="pill">${t.cat}</span> ${t.note?`· ${t.note}`:''}</small>`
+      const r = document.createElement('div'); r.className='right';
+      const del = document.createElement('button'); del.className='btn bad'; del.textContent='Sil'; del.onclick=()=>{data.todos=data.todos.filter(x=>x.id!==t.id); save(); renderTodos();}
+      r.appendChild(del);
+      div.append(chk, info, r); list.appendChild(div);
+    })
+  }
+  renderTodos();
+
+  // ---------- FINANCE ----------
+  $('#txDate').value = todayISO();
+  $('#addTx').onclick = ()=>{
+    const tx = {
+      id: crypto.randomUUID(),
+      type: $('#txType').value,
+      amount: Number($('#txAmount').value||0),
+      date: $('#txDate').value || todayISO(),
+      cat: $('#txCat').value.trim(),
+      note: $('#txNote').value.trim()
+    };
+    if(!tx.amount) return alert('Tutar gerekli');
+    data.txs.push(tx); save();
+    $('#txAmount').value=''; $('#txNote').value='';
+    renderTx();
+  }
+  $('#clearTx').onclick = ()=>{ if(confirm('Listeden tüm satırlar silinsin mi? (Veritabanı kalır)')) { $('#txList').innerHTML=''; } }
+  $('#txSearch').oninput = ()=> renderTx();
+  $('#txThisMonth').onclick = ()=> renderTx('month');
+  $('#txAll').onclick = ()=> renderTx('all');
+
+  function renderTx(scope='month'){
+    const list = $('#txList'); list.innerHTML='';
+    const now = new Date();
+    const ym = d=>d.slice(0,7);
+    const month = now.toISOString().slice(0,7);
+    let txs = data.txs.slice().sort((a,b)=>a.date.localeCompare(b.date));
+    if(scope==='month') txs = txs.filter(t=>ym(t.date)===month);
+    const q = $('#txSearch').value.toLowerCase();
+    if(q) txs = txs.filter(t=>(t.cat+t.note).toLowerCase().includes(q));
+    let gi=0, gd=0;
+    txs.forEach(t=>{ t.type==='gelir'?gi+=t.amount:gd+=t.amount; })
+    $('#txSummary').innerHTML = `
+      <div class="box">Gelir: <b style="color:var(--good)">${fmtMoney(gi)}</b></div>
+      <div class="box">Gider: <b style="color:var(--bad)">${fmtMoney(gd)}</b></div>
+      <div class="box">Net: <b>${fmtMoney(gi-gd)}</b></div>`;
+
+    txs.reverse().forEach(t=>{
+      const div = document.createElement('div'); div.className='item';
+      const badge = document.createElement('div'); badge.className='pill'; badge.textContent = t.type.toUpperCase(); badge.style.borderColor = t.type==='gelir'? 'rgba(34,197,94,.6)':'rgba(239,68,68,.6)';
+      const info = document.createElement('div');
+      info.innerHTML = `<div class="title">${fmtMoney(t.amount)} · ${t.cat||'Genel'}</div>
+        <small>${t.date} ${t.note?('· '+t.note):''}</small>`;
+      const r = document.createElement('div'); r.className='right';
+      const del = document.createElement('button'); del.className='btn bad'; del.textContent='Sil'; del.onclick=()=>{data.txs=data.txs.filter(x=>x.id!==t.id); save(); renderTx(scope);} 
+      r.appendChild(del);
+      div.append(badge, info, r); list.appendChild(div);
+    })
+  }
+
+  // ---------- STUDENTS ----------
+  $('#stLastDate').value = todayISO();
+  $('#addStudent').onclick = ()=>{
+    const name = $('#stName').value.trim(); if(!name) return alert('Öğrenci adı gerekli');
+    const s = data.students.find(x=>x.name.toLowerCase()===name.toLowerCase());
+    const base = {
+      name,
+      grade: $('#stGrade').value.trim(),
+      lastTopic: $('#stLastTopic').value.trim(),
+      lastDate: $('#stLastDate').value || todayISO(),
+      notes: $('#stNotes').value.trim(),
+      sessions: s? s.sessions : []
+    };
+    if(s){ Object.assign(s, base); } else { data.students.push(base); }
+    save(); renderStudents();
+    $('#stName').value=''; $('#stGrade').value=''; $('#stLastTopic').value=''; $('#stNotes').value='';
+  }
+
+  $('#stSearch').oninput = ()=> renderStudents();
+  $('#stAll').onclick = ()=> { $('#stSearch').value=''; renderStudents(); }
+
+  $('#newSession').onclick = ()=>{
+    const name = prompt('Hangi öğrenci? (tam adı)');
+    const s = data.students.find(x=>x.name.toLowerCase()===String(name||'').toLowerCase());
+    if(!s) return alert('Öğrenci bulunamadı. Önce ekleyin.');
+    const date = prompt('Tarih (YYYY-MM-DD)', todayISO());
+    const topic = prompt('Konu / İçerik', s.lastTopic||'');
+    const note = prompt('Not (ödev vb.)','');
+    s.sessions.push({date, topic, note});
+    s.lastDate = date; s.lastTopic = topic; save(); renderStudents();
+  }
+
+  function studentCard(s){
+    const div = document.createElement('div'); div.className='item';
+    const info = document.createElement('div');
+    info.innerHTML = `<div class="title">${s.name} <span class="pill">${s.grade||''}</span></div>
+      <small>Son: ${s.lastDate||'-'} · ${s.lastTopic||'-'}</small>
+      ${s.notes? `<div class="muted" style="margin-top:6px">${s.notes}</div>`:''}
+      <details style="margin-top:8px"><summary>Ders oturumları (${s.sessions?.length||0})</summary>
+        <div class="list">${(s.sessions||[]).map(x=>`<div class='item'><div><div class='title'>${x.date}: ${x.topic||''}</div><small>${x.note||''}</small></div></div>`).join('')}</div>
+      </details>`
+    const r = document.createElement('div'); r.className='right';
+    const edit = document.createElement('button'); edit.className='btn'; edit.textContent='Düzenle'; edit.onclick=()=>{
+      $('#stName').value=s.name; $('#stGrade').value=s.grade; $('#stLastTopic').value=s.lastTopic; $('#stLastDate').value=s.lastDate; $('#stNotes').value=s.notes||''; window.scrollTo({top:0,behavior:'smooth'});
+    }
+    const del = document.createElement('button'); del.className='btn bad'; del.textContent='Sil'; del.onclick=()=>{ if(confirm('Silinsin mi?')){ data.students=data.students.filter(x=>x!==s); save(); renderStudents(); } }
+    r.append(edit, del);
+    div.append(info, r);
+    return div;
+  }
+
+  function renderStudents(){
+    const list = $('#stList'); list.innerHTML='';
+    const q = $('#stSearch').value.toLowerCase();
+    let items = data.students.slice().sort((a,b)=>a.name.localeCompare(b.name));
+    if(q) items = items.filter(s=>(s.name+s.grade+s.lastTopic).toLowerCase().includes(q));
+    items.forEach(s=> list.appendChild(studentCard(s)) );
+  }
+  renderStudents();
+
+  // ---------- BACKUP / RESTORE ----------
+  $('#backupBtn').onclick = ()=>{
+    const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href=url; a.download='koc-defteri-yedek.json'; a.click(); URL.revokeObjectURL(url);
+  }
+  $('#restoreBtn').onclick = ()=> $('#restoreFile').click();
+  $('#restoreFile').onchange = async (e)=>{
+    const file = e.target.files[0]; if(!file) return;
+    const text = await file.text();
+    try{ const obj = JSON.parse(text); ['todos','txs','students'].forEach(k=> data[k]=obj[k]||[]); save(); alert('Yükleme tamam.'); renderTodos(); renderTx(); renderStudents(); }
+    catch{ alert('Dosya okunamadı'); }
+    e.target.value='';
+  }
+
+  // ---------- INSTALL (PWA-Like) ----------
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt = e; document.getElementById('installBtn').classList.remove('ghost'); });
+  document.getElementById('installBtn').onclick = async ()=>{
+    if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt = null; }
+    else alert('Tarayıcı menüsünden “Ana ekrana ekle”yi kullanabilirsiniz.');
+  }
+
+  // Create manifest dynamically (single-file)
+  (function createManifest(){
+    const manifest = {
+      name: 'Koç Defteri', short_name: 'KoçDefteri', start_url: '.', display: 'standalone', background_color:'#0b1020', theme_color:'#0ea5e9',
+      icons: [
+        {src:'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(`<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 128 128\"><rect width=\"128\" height=\"128\" rx=\"24\" fill=\"#0ea5e9\"/><path d=\"M24 90h80v10H24zM30 28h24c18 0 30 10 30 28S72 84 54 84H30V28zm18 16v24h6c10 0 16-4 16-12s-6-12-16-12h-6z\" fill=\"#001322\"/></svg>`) , sizes:'128x128', type:'image/svg+xml'}
+      ]
+    };
+    const blob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('link'); link.rel='manifest'; link.href=url; document.head.appendChild(link);
+  })();
+
+  // Service Worker (cache this file for offline). Single-file trick via Blob.
+  if('serviceWorker' in navigator){
+    const swCode = `self.addEventListener('install', e=>{ e.waitUntil(caches.open('coachbook-v1').then(c=>c.addAll(['./','logo_mehmet_erturk.svg']))); self.skipWaiting();}); self.addEventListener('activate', e=>self.clients.claim()); self.addEventListener('fetch', e=>{ e.respondWith(caches.match(e.request).then(r=> r || fetch(e.request).then(resp=>{ const copy=resp.clone(); caches.open('coachbook-v1').then(c=>c.put(e.request, copy)); return resp; }).catch(()=>caches.match('./')))); });`;
+    const blob = new Blob([swCode], {type:'text/javascript'});
+    const swUrl = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(swUrl);
+  }
+  </script>
+</body>
+</html>
